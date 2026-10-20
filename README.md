@@ -25,6 +25,12 @@ npm run preview
 
 Không cần API key hay backend. Google Fonts là tùy chọn, có font dự phòng cục bộ.
 
+## Deploy lên GitHub Pages
+
+Workflow `.github/workflows/deploy-pages.yml` chạy kiểm thử, build production và deploy riêng thư mục `dist/` mỗi khi push lên `main`. Để bật lần đầu, vào **Settings → Pages → Build and deployment → Source**, chọn **GitHub Actions**. Sau đó push commit lên `main` hoặc chạy workflow **Deploy to GitHub Pages** từ tab **Actions**. Không chọn `main / (root)` làm nguồn Pages: đó là mã nguồn chưa bundle, trình duyệt không thể tự resolve các package như `gsap` và `three`.
+
+Vite dùng đường dẫn asset tương đối (`base: './'`), tương thích với project Pages ở dạng `https://<owner>.github.io/<repository>/`.
+
 ## Art direction / render pipeline
 
 - **Muted Cosmic Palette:** the shared palette uses midnight `#11121e`, dusty lavender, mauve, periwinkle, rose quartz, muted teal, and champagne. Each recipient retains an individual pastel mix across the nebula, galaxy, comet ribbons, and particle name.
