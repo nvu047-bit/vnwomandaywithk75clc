@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>STELLAR shared galaxy browser regression fixture</title>
+  <style>
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #090a16; }
+    .shared-galaxy { position: fixed; inset: 0; overflow: hidden; background: #090a16; }
+    #sharedGalaxyCanvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+    .shared-galaxy-accessible-nodes { position: absolute; inset: 0; pointer-events: none; }
+    .shared-galaxy-accessible-node { position: absolute; left: -2px; top: -2px; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+    #report { display: none; }
+  </style>
+</head>
+<body>
+  <section id="sharedGalaxyView" class="shared-galaxy is-active" aria-hidden="false">
+    <canvas id="sharedGalaxyCanvas" aria-label="Chín thiên hà riêng biệt"></canvas>
+    <div id="sharedGalaxyAccessibleNodes" class="shared-galaxy-accessible-nodes" role="group" aria-label="Chọn một vũ trụ cá nhân"></div>
+  </section>
+  <pre id="report"></pre>
+  <script type="module">
+    import { SharedGalaxy } from '../src/graphics/SharedGalaxy.js';
+    import { recipients } from '../src/data/recipients.js';
+    import { sharedWishes } from '../src/data/sharedWishes.js';
+
+    const canvas = document.querySelector('#sharedGalaxyCanvas');
+    const isMobile = new URLSearchParams(location.search).get('profile') === 'mobile';
+    const report = {
+      profile: isMobile ? 'mobile' : 'desktop',
+      viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      recipientCount: recipients.length,
+      names: recipients.map(recipient => recipient.display || recipient.name),
+      samples: [],
+      cometStarts: [],
+      cometEnds: 0,
+      eventSnapshots: [],
+      picks: [],
+      errors: []
+    };
+    window.stellarReport = report;
+    const galaxy = new SharedGalaxy({
+      canvas,
+      view: document.querySelector('#sharedGalaxyView'),
+      recipients,
+      wishes: sharedWishes,
+      onSelect: recipient => report.picks.push(recipient.slug)
+    });
+    window.stellarGalaxy = galaxy;
+    const originalSpawn = galaxy.spawnComet.bind(galaxy);
+    galaxy.spawnComet = (manual = false, now = performance.now()) => {
+      const spawned = originalSpawn(manual, now);
+      if (spawned) report.cometStarts.push({ at: Number(galaxy.elapsed.toFixed(2)), manual, duration: galaxy.comet.duration, pathIndex: galaxy.comet.index });
+      return spawned;
+    };
+    let cometPreviouslyActive = false;
+    let lastSample = -1;
+    let nextCapture = 0;
+    const captureTimes = isMobile ? [2, 10, 20, 30] : [1, 4, 8, 12, 18, 24, 30];
+    const capturePrefix = isMobile ? 'mobile' : 'desktop';
+    const startedAt = performance.now();
+
+    function canvasHash() {
+      const width = canvas.width, height = canvas.height;
+      const bytes = galaxy.ctx.getImageData(0, 0, width, height).data;
+      let hash = 2166136261;
+      for (let i = 0; i < bytes.length; i += 97) hash = Math.imul(hash ^ bytes[i], 16777619) >>> 0;
+      return hash.toString(16).padStart(8, '0');
+    }
+
+    async function uploadCapture(seconds) {
+      if (location.protocol === 'file:') return; // CDP runner captures frames directly when local HTTP is policy-blocked.
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('Canvas PNG export returned no data');
+        const filename = `${capturePrefix}_${String(seconds).padStart(2, '0')}s.png`;
+        const response = await fetch(`/__capture?name=${encodeURIComponent(filename)}`, { method: 'POST', headers: { 'Content-Type': 'image/png' }, body: blob });
+        if (!response.ok) throw new Error(`Capture upload failed: ${response.status}`);
+      } catch (error) {
+        report.errors.push(String(error));
+      }
+    }
+
+    async function uploadReport() {
+      if (location.protocol !== 'file:') {
+        const response = await fetch('/__report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(report, null, 2) });
+        if (!response.ok) report.errors.push(`Report upload failed: ${response.status}`);
+      }
+      document.documentElement.dataset.motionReport = 'complete';
+      document.querySelector('#report').textContent = JSON.stringify(report);
+    }
+
+    galaxy.start();
+    function monitor() {
+      const elapsed = galaxy.elapsed;
+      const integerSecond = Math.floor(elapsed);
+      if (integerSecond > lastSample) {
+        lastSample = integerSecond;
+        const activeComet = Boolean(galaxy.comet);
+        if (activeComet && !cometPreviouslyActive) cometPreviouslyActive = true;
+        else if (!activeComet && cometPreviouslyActive) { report.cometEnds++; cometPreviouslyActive = false; }
+        report.samples.push({
+          elapsed: Number(elapsed.toFixed(2)),
+          frameCount: galaxy.renderedFrames,
+          hash: canvasHash(),
+          cometActive: activeComet,
+          eventCount: galaxy.cosmicEvents.length,
+          eventAges: galaxy.cosmicEvents.map(event => Number(event.age.toFixed(2))),
+          reactedNodes: Array.from(galaxy.nodeReactions).filter(value => value > .15).length
+        });
+        if (galaxy.cosmicEvents.length) {
+          const event = galaxy.cosmicEvents[0];
+          report.eventSnapshots.push({ at: Number(elapsed.toFixed(2)), origin: event.index, age: Number(event.age.toFixed(2)), reached: Array.from(event.reached) });
+        }
+      }
+      while (nextCapture < captureTimes.length && elapsed >= captureTimes[nextCapture]) {
+        void uploadCapture(captureTimes[nextCapture]);
+        nextCapture++;
+      }
+      if (elapsed >= 30.6 && !document.documentElement.dataset.motionReport) {
+        // Check every original destination from the actual canvas hit-test in this browser fixture.
+        for (let i = 0; i < galaxy.recipients.length; i++) {
+          const point = galaxy.nodePoint(i);
+          const hit = galaxy.hitNode(point.x, point.y);
+          if (hit === i) galaxy.onSelect(galaxy.recipients[hit]);
+        }
+        report.final = {
+          elapsed: Number(elapsed.toFixed(2)),
+          renderedFrames: galaxy.renderedFrames,
+          canvas: { width: canvas.width, height: canvas.height, cssWidth: galaxy.width, cssHeight: galaxy.height, dpr: galaxy.dpr },
+          hashCount: new Set(report.samples.map(sample => sample.hash)).size,
+          uniqueComets: report.cometStarts.length,
+          cometEnds: report.cometEnds,
+          distinctEvents: report.eventSnapshots.length,
+          pickedAllNine: report.picks.length === 9 && new Set(report.picks).size === 9
+        };
+        galaxy.stop();
+        void uploadReport();
+        return;
+      }
+      requestAnimationFrame(monitor);
+    }
+    requestAnimationFrame(monitor);
+    window.addEventListener('error', event => report.errors.push(event.message));
+    window.addEventListener('unhandledrejection', event => report.errors.push(String(event.reason)));
+  </script>
+</body>
+</html>

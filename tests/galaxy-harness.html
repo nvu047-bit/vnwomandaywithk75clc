@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STELLAR Galaxy Motion Harness</title>
+  <style>
+    html, body, canvas { width: 100%; height: 100%; margin: 0; overflow: hidden; display: block; background: #080911; }
+  </style>
+</head>
+<body>
+  <canvas id="galaxy"></canvas>
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { GALAXY_PROFILES } from '../src/data/galaxyProfiles.js';
+    import { GalaxyArchitecture } from '../src/graphics/GalaxyArchitecture.js';
+
+    const canvas = document.querySelector('#galaxy');
+    const width = Math.max(1, innerWidth);
+    const height = Math.max(1, innerHeight);
+    const mobile = width < 720;
+    const pixelRatio = Math.min(devicePixelRatio || 1, mobile ? 1 : 1.35);
+    const renderer = new THREE.WebGLRenderer({
+      canvas, alpha: false, antialias: !mobile, depth: true,
+      preserveDrawingBuffer: true, powerPreference: 'high-performance'
+    });
+    renderer.setPixelRatio(pixelRatio);
+    renderer.setSize(width, height, false);
+    renderer.setClearColor('#080911', 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.96;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#080911');
+    const identityScene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(43, width / height, 0.1, 100);
+    camera.position.set(0, 0, 12.6);
+    camera.lookAt(0, 0, 0);
+    const galaxy = new GalaxyArchitecture(scene, { pixelRatio, mobile });
+    galaxy.setViewport(width, height, camera.position.z, camera.fov);
+    galaxy.setTitleProtection(0, 0.1, 0.45, 0.16, 0, -0.55, 0.52, 0.18, 0.62);
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(width, height), mobile ? 0.105 : 0.16, 0.18, mobile ? 0.90 : 0.89);
+    bloom.radius = 0.18;
+    composer.addPass(bloom);
+    const identityPass = new RenderPass(identityScene, camera);
+    identityPass.clear = false;
+    composer.addPass(identityPass);
+    composer.addPass(new OutputPass());
+    composer.setPixelRatio(Math.min(pixelRatio, mobile ? 0.78 : 0.94));
+    composer.setSize(width, height);
+
+    const pixelsCanvas = document.createElement('canvas');
+    pixelsCanvas.width = width;
+    pixelsCanvas.height = height;
+    const pixelsContext = pixelsCanvas.getContext('2d', { willReadFrequently: true });
+    const snapshots = new Map();
+    const palette = ['#9b91ae', '#8290ad', '#b9a485'];
+
+    function compareTimes(firstTime, secondTime) {
+      const first = snapshots.get(firstTime);
+      const second = snapshots.get(secondTime);
+      if (!first || !second) throw new Error('Render both fixed times before comparing them.');
+      let changedPixels = 0;
+      let totalDelta = 0;
+      const pixelCount = width * height;
+      for (let i = 0; i < first.length; i += 4) {
+        const delta = Math.max(
+          Math.abs(first[i] - second[i]),
+          Math.abs(first[i + 1] - second[i + 1]),
+          Math.abs(first[i + 2] - second[i + 2])
+        );
+        if (delta > 10) changedPixels++;
+        totalDelta += delta;
+      }
+      return { firstTime, secondTime, changedPixels, pixelCount, percentChanged: changedPixels / pixelCount, meanAbsDelta: totalDelta / pixelCount };
+    }
+
+    function renderAt(seconds) {
+      galaxy.setTime(seconds);
+      composer.render(0);
+      pixelsContext.drawImage(canvas, 0, 0, width, height);
+      const pixels = pixelsContext.getImageData(0, 0, width, height).data;
+      snapshots.set(seconds, pixels);
+      if (seconds === 0) return { time: seconds, changedPixels: 0, meanAbsDelta: 0 };
+      return { time: seconds, ...compareTimes(0, seconds) };
+    }
+
+    function setProfile(key = 'twinSpiral') {
+      const profile = GALAXY_PROFILES[key];
+      if (!profile) throw new Error(`Unknown galaxy profile: ${key}`);
+      galaxy.setProfile({ galaxy: key, flow: profile.flow, seed: 0.55 }, palette, `harness:${key}`, null, true);
+      galaxy.setTitleProtection(0, 0.1, 0.45, 0.16, 0, -0.55, 0.52, 0.18, 0.62);
+      snapshots.clear();
+      renderAt(0);
+      return key;
+    }
+
+    window.galaxyHarness = {
+      setTime: renderAt,
+      compareTimes,
+      setProfile,
+      dispose() {
+        galaxy.dispose();
+        bloom.dispose();
+        composer.dispose();
+        renderer.dispose();
+      }
+    };
+    setProfile(new URLSearchParams(location.search).get('profile') || 'twinSpiral');
+  </script>
+</body>
+</html>

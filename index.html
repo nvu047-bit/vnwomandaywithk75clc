@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#11121e">
+  <meta name="description" content="STELLAR — một vũ trụ toán học dành riêng cho K75 CLC · Sư phạm Toán · HNUE.">
+  <title>STELLAR — 20·10 / HNUE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Cormorant+Garamond:wght@500;600&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600&family=Nunito+Sans:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <canvas id="universe" aria-hidden="true"></canvas>
+  <canvas id="fallbackUniverse" aria-hidden="true"></canvas>
+  <canvas id="equationRain" aria-hidden="true"></canvas>
+
+  <button id="brandBackButton" class="corner corner--tl brand-back-button" type="button" disabled aria-label="Quay lại màn hình nhập mã sinh viên" title="Quay lại nhập mã">
+    <span class="brand-back-cue" aria-hidden="true">↶</span><span class="sigil">∑</span><span>STELLAR <i>/</i> HNUE</span>
+  </button>
+  <div class="corner corner--tr" aria-hidden="true"><span>20</span><b>·</b><span>10</span></div>
+  <button id="sharedGalaxyFromWish" class="shared-galaxy-from-wish" type="button" aria-label="Mở thiên hà chung">
+    <span aria-hidden="true">✦</span> THIÊN HÀ CHUNG
+  </button>
+  <div class="corner corner--bl" aria-hidden="true"><span>φ = 1.618033…</span></div>
+  <div class="corner corner--br" aria-hidden="true"><span id="sceneIndex">FIELD 01 / INFINITY</span></div>
+
+  <main id="interface">
+    <section id="portal" class="portal" aria-label="Cổng vũ trụ">
+      <form id="portalForm" class="portal-form" autocomplete="off">
+        <label class="sr-only" for="studentCode">Mã sinh viên hoặc đường dẫn định danh</label>
+        <div class="input-wrap">
+          <span class="input-prefix" aria-hidden="true">⌁</span>
+          <input id="studentCode" name="studentCode" type="text" inputmode="text" maxlength="64" placeholder="MÃ SINH VIÊN / SLUG" aria-label="Nhập mã sinh viên gồm chín chữ số" autocomplete="off" spellcheck="false">
+          <button type="submit" class="submit-orbit" aria-label="Mở vũ trụ cá nhân"><span>↗</span></button>
+        </div>
+        <div class="portal-meta"><span id="portalStatus" role="status" aria-live="polite">ENTER YOUR ORBIT</span><span id="digitCount">00 / 09</span></div>
+      </form>
+    </section>
+    <button id="sharedGalaxyEntry" class="shared-galaxy-entry" type="button">
+      <span aria-hidden="true">✧</span> KHÁM PHÁ THIÊN HÀ CHUNG <span aria-hidden="true">↗</span>
+    </button>
+
+    <section id="identity" class="identity" aria-label="Tên người nhận">
+      <h1 id="recipientName" class="sr-only"></h1>
+    </section>
+
+    <section id="reveal" class="reveal" aria-live="polite" aria-label="Lời chúc cá nhân">
+      <p id="recipientWish"></p>
+    </section>
+  </main>
+
+  <section id="sharedGalaxyView" class="shared-galaxy" aria-label="Thiên hà chung" aria-hidden="true">
+    <canvas id="sharedGalaxyCanvas" aria-label="Chín thiên hà riêng biệt, có thể chọn để mở từng vũ trụ cá nhân"></canvas>
+    <div id="sharedGalaxySwipeHint" class="shared-galaxy-swipe-hint" role="status" aria-live="polite" aria-hidden="true">Vuốt nhẹ để khám phá những thiên hà khác</div>
+    <div id="sharedGalaxyAccessibleNodes" class="shared-galaxy-accessible-nodes" role="group" aria-label="Chọn một vũ trụ cá nhân"></div>
+  </section>
+
+  <div id="eventFlash" aria-hidden="true"></div>
+  <div id="loadingMark" aria-hidden="true"><span>∴</span></div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
