@@ -14,7 +14,7 @@ export class NebulaFlow {
   constructor(scene, { mobile, pixelRatio }) {
     this.scene = scene;
     this.mobile = mobile;
-    this.count = mobile ? 360 : 900;
+    this.count = mobile ? 900 : 2200;
     const seed = randomGenerator(0.391);
     const positions = new Float32Array(this.count * 3);
     const seeds = new Float32Array(this.count);
@@ -30,8 +30,8 @@ export class NebulaFlow {
     this.uniforms = {
       uTime: { value: 0 },
       uPixelRatio: { value: pixelRatio },
-      uParticleScale: { value: mobile ? 1 : 1.1 },
-      uDustGlow: { value: mobile ? 0.7 : 0.95 },
+      uParticleScale: { value: mobile ? 1.25 : 1.4 },
+      uDustGlow: { value: mobile ? 1.05 : 1.3 },
       uFlowAngle: { value: 0 },
       uMotion: { value: 0.55 },
       uArtSeed: { value: 0.5 },

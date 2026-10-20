@@ -7,31 +7,19 @@ function buildCurveSamples(count) {
   const curves = new Float32Array(count);
   const progress = new Float32Array(count);
   const pointAt = (curve, t) => {
-    if (curve === 0) {
-      const r = 1.18 + Math.cos(5 * t) * 0.66;
-      return new THREE.Vector3(-4.05 + Math.cos(t) * r, -1.82 + Math.sin(t) * r * 0.62, -6.8);
-    }
-    if (curve === 1) {
-      const x = -3.9 + t * (7.8 / (Math.PI * 2));
-      const y = -1.62 + Math.sin(2.2 * t + 0.3) * 0.48 + Math.sin(4.4 * t) * 0.12;
-      return new THREE.Vector3(x, y, -4.4);
-    }
     const radius = 0.52 + t * 0.34;
     const angle = t * 1.22 - 0.6;
     return new THREE.Vector3(7.0 + Math.cos(angle) * radius, 3.6 + Math.sin(angle) * radius * 0.74, -9.2);
   };
-  const perCurve = Math.floor(count / 3);
   for (let i = 0; i < count; i++) {
-    const curve = Math.min(2, Math.floor(i / perCurve));
-    const index = i - curve * perCurve;
-    const t = (index / Math.max(1, perCurve - 1)) * Math.PI * 2;
+    const curve = 2;
+    const t = (i / Math.max(1, count - 1)) * Math.PI * 2;
     const p = pointAt(curve, t);
-    const nextT = curve === 1 ? Math.min(Math.PI * 2, t + 0.012) : t + 0.012;
-    const tangent = pointAt(curve, nextT).sub(p).normalize();
+    const tangent = pointAt(curve, t + 0.012).sub(p).normalize();
     positions.set([p.x, p.y, p.z], i * 3);
     tangents.set([tangent.x, tangent.y, tangent.z], i * 3);
     seeds[i] = Math.abs((Math.sin((i + 17) * 127.1) * 43758.5453123) % 1);
-    curves[i] = curve; progress[i] = index / Math.max(1, perCurve - 1);
+    curves[i] = curve; progress[i] = i / Math.max(1, count - 1);
   }
   return { positions, tangents, seeds, curves, progress };
 }

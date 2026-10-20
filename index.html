@@ -59,6 +59,19 @@
 
   <div id="eventFlash" aria-hidden="true"></div>
   <div id="loadingMark" aria-hidden="true"><span>∴</span></div>
+  <div class="audio-controls" role="group" aria-label="Điều khiển âm thanh">
+    <button id="audioMuteButton" class="audio-mute-button" type="button" aria-label="Tắt âm thanh" aria-pressed="false" title="Tắt âm thanh">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9v6h4l5 4V5L8 9H4Z"/>
+        <path class="audio-wave" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/>
+        <path class="audio-mute-mark" d="m16 9 5 6m0-6-5 6"/>
+      </svg>
+    </button>
+    <label class="audio-volume-label" for="audioVolume"><span class="sr-only">Âm lượng nhạc nền</span>
+      <input id="audioVolume" type="range" min="0" max="0.3" step="0.01" value="0.2" aria-label="Âm lượng nhạc nền" aria-valuetext="67% âm lượng nhạc nền">
+    </label>
+  </div>
+  <span id="audioStatus" class="sr-only" role="status" aria-live="polite">Chạm để bắt đầu nhạc nền</span>
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>

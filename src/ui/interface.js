@@ -310,6 +310,7 @@ export class StellarInterface {
       const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       this.revealTimeline?.kill();
       this.revealTimeline = gsap.timeline({ defaults: { overwrite: true } });
+      this.revealTimeline.eventCallback('onStart', () => window.STELLAR?.audio?.playSfx('shimmer'));
 
       if (reducedMotion) {
         this.revealTimeline.fromTo(
@@ -422,6 +423,7 @@ export class StellarInterface {
 
   showSharedGalaxy({ updateRoute = true, focusRecipient = null } = {}) {
     if (this.destroyed || !this.sharedGalaxy || this.sharedGalaxyActive) return;
+    window.STELLAR?.audio?.playSfx('shimmer');
     clearTimeout(this.autoOpenTimer);
     this.autoOpenTimer = 0;
     this.cosmicDirector.stop();

@@ -4,6 +4,7 @@ import { StellarScene } from './graphics/StellarScene.js';
 import { MathRain } from './graphics/MathRain.js';
 import { FallbackScene } from './graphics/FallbackScene.js';
 import { StellarInterface } from './ui/interface.js';
+import { AudioManager } from './audio/AudioManager.js';
 import './style.css';
 
 // Font loading is progressive: the app should never remain behind the loader
@@ -17,6 +18,7 @@ const fallbackCanvas = document.querySelector('#fallbackUniverse');
 const loadingMark = document.querySelector('#loadingMark');
 const rainCanvas = document.querySelector('#equationRain');
 const rain = rainCanvas ? new MathRain(rainCanvas, gsap) : null;
+const audio = new AudioManager();
 let scene = null;
 let fallback = null;
 let ui = null;
@@ -47,7 +49,10 @@ function activateFallback(error) {
     try {
       fallback = new FallbackScene(fallbackCanvas, {
         onPhase: phase => ui?.setPhase(phase),
-        onBurst: () => rain?.burst()
+        onBurst: () => {
+          rain?.burst();
+          audio.playSfx('stardust');
+        }
       });
     } catch (fallbackError) {
       // Last-resort styling still provides a themed canvas backdrop if Canvas 2D
@@ -74,6 +79,7 @@ function teardown() {
   try { scene?.dispose?.(); } catch (error) { console.warn('STELLAR scene cleanup:', error); }
   try { fallback?.dispose?.(); } catch (error) { console.warn('STELLAR fallback cleanup:', error); }
   try { rain?.dispose?.(); } catch (error) { console.warn('STELLAR rain cleanup:', error); }
+  audio.dispose();
   scene = null;
   fallback = null;
   if (window.STELLAR) delete window.STELLAR;
@@ -90,7 +96,10 @@ function start() {
     if (!canvas) throw new Error('The WebGL canvas #universe was not found');
     scene = new StellarScene(canvas, {
       onPhase: phase => ui?.setPhase(phase),
-      onBurst: () => rain?.burst(),
+      onBurst: () => {
+        rain?.burst();
+        audio.playSfx('stardust');
+      },
       onError: activateFallback
     });
   } catch (error) {
@@ -105,6 +114,7 @@ function start() {
 
   window.STELLAR = {
     recipients,
+    audio,
     get scene() { return scene; },
     get fallback() { return fallback; },
     get activeRecipient() { return ui?.activeRecipient || null; },

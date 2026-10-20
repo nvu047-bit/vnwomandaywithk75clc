@@ -12,7 +12,8 @@
     "test:math": "node tests/math-forms.mjs",
     "test:shared": "node tests/shared-galaxy.mjs",
     "test:shared-gl": "node tests/shared-galaxy-gl.mjs",
-    "test:shared-runtime": "node tests/shared-galaxy-runtime.mjs"
+    "test:shared-runtime": "node tests/shared-galaxy-runtime.mjs",
+    "test:audio": "node tests/audio-manager.mjs && node tests/audio-manager-runtime.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

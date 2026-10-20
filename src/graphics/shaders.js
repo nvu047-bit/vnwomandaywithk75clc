@@ -909,10 +909,10 @@ void main() {
     : sizeClass < 0.96 ? 0.92 + (sizeClass - 0.72) * 1.5
       : 1.28 + vSparkle * 0.72;
   gl_PointSize = clamp((0.7 + aSeed * 1.05) * sizeTier * uPixelRatio
-    * (21.0 / max(1.0, -mv.z)) * uParticleScale,
-    0.55 * uParticleScale, (2.8 + vSparkle * 1.4) * uPixelRatio * uParticleScale);
+    * (25.0 / max(1.0, -mv.z)) * uParticleScale,
+    0.65 * uParticleScale, (3.4 + vSparkle * 1.8) * uPixelRatio * uParticleScale);
   float streamPulse = 0.5 + 0.5 * sin(phase * 1.3 + uTime * 0.22);
-  vAlpha = (0.045 + streamPulse * 0.065) * (1.0 - titleMask * 0.94);
+  vAlpha = (0.075 + streamPulse * 0.11) * (1.0 - titleMask * 0.94);
   vAlpha *= (0.66 + 0.34 * sin(aSeed * 52.0 + uTime * 0.36)) * (1.0 + vSparkle * 0.55);
   float colorMix = fract(aSeed * 4.4 + streamPulse * 0.14);
   vColor = mix(mix(uColorA, uColorB, smoothstep(0.1, 0.75, colorMix)), uColorC, smoothstep(0.78, 1.0, colorMix) * 0.5);
@@ -933,11 +933,11 @@ void main() {
   float dust = exp(-r * r * 11.0);
   float softHalo = exp(-r * r * 3.4);
   float glint = smoothstep(0.94, 0.995, fract(vSeed * 71.3)) * exp(-r * r * 4.0);
-  float halo = softHalo * 0.18 * uDustGlow;
+  float halo = softHalo * 0.25 * uDustGlow;
   float hotCore = exp(-r * r * 42.0) * vSparkle;
   vec3 color = mix(vColor, vec3(1.0), hotCore * 0.82);
-  gl_FragColor = vec4(color * (0.48 + dust * 0.48 + halo * 0.72 + hotCore * 0.4),
-    vAlpha * (dust * 0.80 + halo * 0.72 + glint * 0.18 + hotCore * 0.32));
+  gl_FragColor = vec4(color * (0.62 + dust * 0.58 + halo * 0.9 + hotCore * 0.55),
+    vAlpha * (dust * 0.88 + halo * 0.82 + glint * 0.22 + hotCore * 0.4));
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }`;

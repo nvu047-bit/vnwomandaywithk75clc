@@ -352,7 +352,7 @@ assert.match(scene, /this\.mobile \? 0\.90 : 0\.89/, 'higher bloom threshold avo
 assert.match(particles, /createSeededRandom/, 'recipient particle shapes must be stable between visits');
 assert.match(particles, /setViewport\(width, height\)/, 'particle titles must fit narrow and landscape viewports');
 assert.match(particles, /scaleX = Math\.min\(1, aspect \* 0\.66\)/, 'long particle names must retain horizontal margins on portrait screens');
-assert.match(flow, /count = mobile \? 360 : 900/, 'living nebula flow must remain subordinate to the primary galaxy');
+assert.match(flow, /count = mobile \? 900 : 2200/, 'living nebula flow retains denser particles on mobile and desktop');
 assert.match(flow, /setDirection\(direction\)/, 'living nebula flow must use each recipient art direction');
 assert.match(flow, /setTitleBounds\(bounds, scale\)/, 'living nebula flow must preserve the particle-title area');
 assert.match(particles, /this\.signatureBounds = \[[\s\S]*\+ 1\.6/, 'the idle affiliation morph reserves a clear area behind its raised wordmark');
@@ -360,7 +360,7 @@ assert.match(shader, /uniform vec3 uTitleSize[\s\S]*abs\(p\.y - uTitleSize\.z\)/
 assert.match(scene, /direction \? this\.particles\.titleBounds : this\.particles\.signatureBounds/,
   'both the idle signature and personal name receive title-area protection');
 assert.match(flow, /clearInteraction\(\)/, 'living nebula flow must reset touch response between recipients');
-assert.match(shader, /vAlpha = \(0\.045 \+ streamPulse \* 0\.065\)/, 'flow strands must remain subtle and avoid competing with the primary galaxy');
+assert.match(shader, /vAlpha = \(0\.075 \+ streamPulse \* 0\.11\)/, 'flow strands must remain visible while staying secondary to the primary galaxy');
 assert.match(scene, /new NebulaFlow\(this\.scene/, 'the flow layer must join the scene lifecycle');
 assert.match(scene, /count: this\.mobile \? 6500 : 15000/, 'the name particle budget must scale down for mobile');
 assert.match(scene, /this\.nebulaFlow\.setTime\(this\.elapsed\)/, 'nebula flow must advance on the scene clock');
@@ -376,8 +376,8 @@ assert.match(shader, /uniform float uArtStyle/, 'nebula shader must accept per-r
 assert.match(shader, /uniform vec2 uCoreOffset/, 'each nebula can place its luminous center independently');
 assert.match(shader, /float coreGlow/, 'nebula raymarch must render a restrained focal glow');
 assert.match(shader, /float softHalo = exp\(-r \* r \* 3\.5\)/, 'background stars retain an explicit soft emissive halo');
-assert.match(shader, /vAlpha \* \(dust \* 0\.80 \+ halo \* 0\.72 \+ glint \* 0\.18 \+ hotCore \* 0\.32\)/,
-  'flowing nebula dust receives a restrained soft halo and sparse white cores');
+assert.match(shader, /vAlpha \* \(dust \* 0\.88 \+ halo \* 0\.82 \+ glint \* 0\.22 \+ hotCore \* 0\.4\)/,
+  'flowing nebula dust receives a visible soft halo and bright sparse cores');
 assert.match(shader, /emission \* 1\.68/, 'volumetric nebula emission receives a measured local lift');
 assert.match(shader, /gl_PointSize = min\(2\.0 \* aSize \* uPixelRatio, 12\.0 \* uPixelRatio\)/,
   'background star radii should be expressed in CSS pixels and scaled by devicePixelRatio');
@@ -388,7 +388,7 @@ assert.match(shader, /float stellarCore = exp\(-r \* r \* 72\.0\) \* vHero/,
   'selected title stars must resolve into sharp white cores instead of uniformly soft dots');
 assert.match(space, /starRadiusRanges/, 'background stars should use explicit size tiers for each depth layer');
 assert.match(space, /createSeededRandom\(0x5354454C\)/, 'background star placement should use a stable default seed');
-assert.match(nebulaFlow, /uParticleScale: \{ value: mobile \? 1 : 1\.1 \}/, 'desktop nebula dust uses a restrained size lift');
+assert.match(nebulaFlow, /uParticleScale: \{ value: mobile \? 1\.25 : 1\.4 \}/, 'nebula dust is sized for clear visibility on mobile and desktop');
 assert.match(shader, /haze \* 0\.20 \+ innerGlow \* 0\.16/, 'the rendered galaxy particle shader uses restrained, crisp soft-glow');
 assert.match(shader, /distance\(gl_PointCoord, vec2\(0\.5\)\)/, 'galaxy particles use a soft radial distance gradient');
 assert.match(shader, /aGroup == 1\.0 \? 1\.58/, 'the primary spiral arms receive a clear size hierarchy over secondary dust');
@@ -415,9 +415,10 @@ assert.match(shader, /float core = exp\(-r \* r \* mix\(12\.0, 25\.0, vRecipient
 assert.match(shader, /float starRay = \([\s\S]*\) \* max\(rareGlint, vHero\) \* 0\.18/,
   'nebula names must resolve into sparse star points');
 assert.match(shader, /float titleDistance = length\(recipientTarget\.xy - vec2\(0\.0, 0\.72\)\)/, 'the glyph particles must react to the nearby equation field');
-assert.match(curves, /const r = 1\.18 \+ Math\.cos\(5 \* t\)/, 'the mathematical particle field must include a sampled polar rose');
-assert.match(curves, /Math\.sin\(2\.2 \* t \+ 0\.3\)/, 'the mathematical particle field must include a living sine graph');
+assert.doesNotMatch(curves, /const r = 1\.18 \+ Math\.cos\(5 \* t\)/, 'the decorative polar rose must not obstruct the scene');
+assert.doesNotMatch(curves, /Math\.sin\(2\.2 \* t \+ 0\.3\)/, 'the decorative sine graph must not obstruct the scene');
 assert.match(curves, /const radius = 0\.52 \+ t \* 0\.34/, 'the mathematical particle field must include a parameterized spiral');
+assert.match(curves, /const curve = 2/, 'the remaining decorative particle curve must retain its spiral identity');
 assert.match(curves, /p \+= aTangent \* travel/, 'equation particles must travel along their path tangents');
 assert.match(curves, /uResonance/, 'equation particles must resonate near the name');
 assert.match(curves, /this\.points\.scale\.set\(Math\.min\(1, aspect \* 0\.82\), 1, 1\)/, 'equation paths must fit narrow portrait viewports');

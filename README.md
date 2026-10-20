@@ -25,6 +25,10 @@ npm run preview
 
 Không cần API key hay backend. Google Fonts là tùy chọn, có font dự phòng cục bộ.
 
+## Âm thanh
+
+`src/audio/AudioManager.js` quản lý nhạc nền và các hiệu ứng âm thanh mà không cần thư viện bổ sung. Track “Melodic Piano Theme” của Dejan S. được phát lặp xuyên suốt, chỉ bắt đầu sau tương tác đầu tiên để tuân thủ autoplay policy. Bộ điều khiển nhỏ ở góc dưới cho phép mute và thay đổi âm lượng nhạc; tab ẩn được fade-out/tạm dừng và tiếp tục từ vị trí hiện tại khi quay lại. Hiệu ứng SFX bị giới hạn hai voice đồng thời và không phát trong mỗi frame render. Từ mã ứng dụng có thể gọi `window.STELLAR.audio.playSfx('shimmer')`; nguồn và license ghi tại [`public/audio/ATTRIBUTION.md`](./public/audio/ATTRIBUTION.md).
+
 ## Deploy lên GitHub Pages
 
 Workflow `.github/workflows/deploy-pages.yml` chạy kiểm thử, build production và deploy riêng thư mục `dist/` mỗi khi push lên `main`. Để bật lần đầu, vào **Settings → Pages → Build and deployment → Source**, chọn **GitHub Actions**. Sau đó push commit lên `main` hoặc chạy workflow **Deploy to GitHub Pages** từ tab **Actions**. Không chọn `main / (root)` làm nguồn Pages: đó là mã nguồn chưa bundle, trình duyệt không thể tự resolve các package như `gsap` và `three`.
