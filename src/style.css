@@ -304,16 +304,6 @@ body.is-css-fallback::after {
 .wish-body { display:block; max-width:100%; color:rgba(246,242,251,.96); }
 @media (max-width:680px) { #recipientWish { font-size:12px; line-height:1.55; } .wish-lead { font-size:clamp(18px,5vw,21px); } .reveal { padding-inline:clamp(15px,4vw,22px); } }
 @media (max-height:700px) { .identity { top:38%; } .reveal { top:45%; bottom:calc(20px + var(--safe-bottom)); max-height:calc(51dvh - var(--safe-top) - var(--safe-bottom)); padding-top:18px; } }
-
-
-
-/* Crisp wordmark contrast: static, high-legibility lettering over the living nebula. */
-  filter: none;
-  opacity: 1;
-}
-@media (max-width: 390px) {
-}
-
 /* ---------- STABLE WISH ANCHOR: restore the original lower-third composition ----------
    The wish is absolutely positioned; without position:absolute its viewport anchors are ignored.
    Desktop retains the recipient-specific editorial offset; mobile stays centered. */
